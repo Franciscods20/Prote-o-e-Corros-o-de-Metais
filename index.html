@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="pt-PT" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proteção e Corrosão dos Metais</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration for Custom Steampunk Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bronze: '#CD7F32',
+                        cobre: '#B87333',
+                        'dourado-velho': '#C5A059',
+                        'castanho-escuro': '#2A1610',
+                        'ferro-oxidado': '#5C3A21',
+                        preto: '#0A0A0A',
+                    },
+                    fontFamily: {
+                        victorian: ['Cinzel Decorative', 'serif'],
+                        body: ['Lora', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Steampunk & Animations CSS -->
+    <style>
+        :root {
+            --metal-bg: radial-gradient(circle at center, #2A1610 0%, #0A0A0A 100%);
+            --plate-gradient: linear-gradient(135deg, #1c1c1c 0%, #0A0A0A 100%);
+        }
+
+        body {
+            background: var(--metal-bg);
+            color: #d1d1d1;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Metallic Text Effect */
+        .text-metallic {
+            background: linear-gradient(to bottom, #C5A059 20%, #B87333 50%, #CD7F32 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        /* Metal Plate styling */
+        .metal-plate {
+            background: var(--plate-gradient);
+            border: 2px solid #5C3A21;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 5px 5px 15px rgba(0,0,0,0.8);
+            position: relative;
+            z-index: 10;
+        }
+
+        .metal-plate::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.05"/></svg>');
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Rivets */
+        .rivet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 30% 30%, #a0a0a0, #333);
+            border-radius: 50%;
+            box-shadow: inset -1px -1px 3px rgba(0,0,0,0.8), 1px 1px 2px rgba(255,255,255,0.2), 2px 2px 5px rgba(0,0,0,0.9);
+        }
+        .rivet.tl { top: 10px; left: 10px; }
+        .rivet.tr { top: 10px; right: 10px; }
+        .rivet.bl { bottom: 10px; left: 10px; }
+        .rivet.br { bottom: 10px; right: 10px; }
+
+        /* Animations */
+        @keyframes spin-slow {
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes spin-slow-reverse {
+            100% { transform: rotate(-360deg); }
+        }
+        
+        .gear {
+            position: absolute;
+            opacity: 0.15;
+            z-index: 0;
+            filter: drop-shadow(5px 5px 10px #000);
+        }
+        .gear-1 { width: 300px; top: -50px; left: -100px; animation: spin-slow 40s linear infinite; }
+        .gear-2 { width: 200px; top: 150px; left: 120px; animation: spin-slow-reverse 30s linear infinite; }
+        .gear-3 { width: 400px; bottom: -100px; right: -150px; animation: spin-slow 60s linear infinite; }
+
+        @keyframes steam-rise {
+            0% { transform: translateY(100vh) scale(1) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            50% { opacity: 0.4; }
+            100% { transform: translateY(-20vh) scale(3) rotate(45deg); opacity: 0; }
+        }
+
+        .steam-particle {
+            position: fixed;
+            bottom: -50px;
+            background: radial-gradient(circle, rgba(200,200,200,0.1) 0%, rgba(200,200,200,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            filter: blur(8px);
+        }
+
+        /* Hover Shine Effect */
+        .hover-shine {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .hover-shine::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(197, 160, 89, 0.2) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg) translate(-100%, 100%);
+            transition: all 0.6s ease;
+        }
+        .hover-shine:hover::after {
+            transform: rotate(45deg) translate(100%, -100%);
+        }
+        .hover-shine:hover {
+            border-color: #C5A059;
+            box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
+            transform: translateY(-5px);
+        }
+
+        /* Pipes */
+        .pipe-h {
+            height: 12px;
+            background: linear-gradient(to bottom, #5C3A21, #CD7F32, #2A1610);
+            border-top: 1px solid #C5A059;
+            border-bottom: 2px solid #000;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8);
+        }
+        .pipe-v {
+            width: 12px;
+            background: linear-gradient(to right, #5C3A21, #CD7F32, #2A1610);
+            border-left: 1px solid #C5A059;
+            border-right: 2px solid #000;
+            box-shadow: 5px 0 10px rgba(0,0,0,0.8);
+        }
+        .pipe-joint {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #C5A059, #5C3A21);
+            box-shadow: 2px 2px 5px #000;
+            z-index: 2;
+        }
+
+        /* Modal specific */
+        #image-modal {
+            backdrop-filter: blur(10px) brightness(0.3);
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body class="font-body antialiased relative">
+
+    <!-- Steam Particles Container -->
+    <div id="steam-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <!-- Special Button Top Right -->
+    <button onclick="toggleModal(true)" class="fixed top-6 right-6 z-50 group">
+        <div class="metal-plate px-6 py-3 rounded hover-shine flex items-center gap-3 cursor-pointer">
+            <div class="rivet tl" style="top: 4px; left: 4px; width: 6px; height: 6px;"></div>
+            <div class="rivet tr" style="top: 4px; right: 4px; width: 6px; height: 6px;"></div>
+            <div class="rivet bl" style="bottom: 4px; left: 4px; width: 6px; height: 6px;"></div>
+            <div class="rivet br" style="bottom: 4px; right: 4px; width: 6px; height: 6px;"></div>
+            <i class="fa-solid fa-camera-retro text-dourado-velho group-hover:text-bronze transition-colors"></i>
+            <span class="font-victorian text-sm md:text-base tracking-wider text-dourado-velho font-bold">Ver Imagem</span>
+        </div>
+    </button>
+
+    <!-- 1. Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 px-4 z-10">
+        <!-- Background Gears -->
+        <img src="data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' fill='%23C5A059' xmlns='http://www.w3.org/2000/svg'><path d='M50 0C22.4 0 0 22.4 0 50s22.4 50 50 50 50-22.4 50-50S77.6 0 50 0zm0 85C30.7 85 15 69.3 15 50S30.7 15 50 15s35 15.7 35 35-15.7 35-35 35z'/><path d='M45 10h10v20H45zM45 70h10v20H45zM10 45h20v10H10zM70 45h20v10H70zM22.5 22.5l14.1 14.1-7.1 7.1-14.1-14.1zM63.4 63.4l14.1 14.1-7.1 7.1-14.1-14.1zM22.5 77.5l7.1-7.1 14.1 14.1-7.1 7.1zM63.4 36.6l7.1-7.1 14.1 14.1-7.1 7.1z'/></svg>" class="gear gear-1" alt="">
+        <img src="data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' fill='%23B87333' xmlns='http://www.w3.org/2000/svg'><path d='M50 0C22.4 0 0 22.4 0 50s22.4 50 50 50 50-22.4 50-50S77.6 0 50 0zm0 85C30.7 85 15 69.3 15 50S30.7 15 50 15s35 15.7 35 35-15.7 35-35 35z'/><path d='M45 10h10v20H45zM45 70h10v20H45zM10 45h20v10H10zM70 45h20v10H70zM22.5 22.5l14.1 14.1-7.1 7.1-14.1-14.1zM63.4 63.4l14.1 14.1-7.1 7.1-14.1-14.1zM22.5 77.5l7.1-7.1 14.1 14.1-7.1 7.1zM63.4 36.6l7.1-7.1 14.1 14.1-7.1 7.1z'/></svg>" class="gear gear-2" alt="">
+        <img src="data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' fill='%235C3A21' xmlns='http://www.w3.org/2000/svg'><path d='M50 0C22.4 0 0 22.4 0 50s22.4 50 50 50 50-22.4 50-50S77.6 0 50 0zm0 85C30.7 85 15 69.3 15 50S30.7 15 50 15s35 15.7 35 35-15.7 35-35 35z'/><path d='M45 10h10v20H45zM45 70h10v20H45zM10 45h20v10H10zM70 45h20v10H70zM22.5 22.5l14.1 14.1-7.1 7.1-14.1-14.1zM63.4 63.4l14.1 14.1-7.1 7.1-14.1-14.1zM22.5 77.5l7.1-7.1 14.1 14.1-7.1 7.1zM63.4 36.6l7.1-7.1 14.1 14.1-7.1 7.1z'/></svg>" class="gear gear-3" alt="">
+
+        <div class="relative z-10 text-center max-w-5xl mx-auto p-8 metal-plate">
+            <div class="rivet tl"></div>
+            <div class="rivet tr"></div>
+            <div class="rivet bl"></div>
+            <div class="rivet br"></div>
+            
+            <h1 class="font-victorian text-5xl md:text-7xl font-black mb-6 text-metallic tracking-wider uppercase leading-tight">
+                Proteção e Corrosão <br><span class="text-3xl md:text-5xl text-gray-300 font-normal">dos Metais</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto italic border-y border-ferro-oxidado py-4">
+                "A corrosão é um desafio global que ameaça as infraestruturas, a indústria e a economia. Compreender e prevenir este fenómeno é vital para a sociedade moderna."
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <a href="#oque-e" class="metal-plate hover-shine px-8 py-4 font-victorian text-dourado-velho font-bold uppercase tracking-widest text-center transition-all inline-block">
+                    <i class="fa-solid fa-compass mr-2"></i> Explorar
+                </a>
+                <a href="#esquema" class="border border-ferro-oxidado bg-preto/50 px-8 py-4 font-victorian text-cobre font-bold uppercase tracking-widest text-center hover:bg-castanho-escuro hover:text-dourado-velho transition-all inline-block">
+                    <i class="fa-solid fa-project-diagram mr-2"></i> Ver Esquema
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 container mx-auto px-4 py-16 space-y-32">
+
+        <!-- Horizontal Pipe Divider -->
+        <div class="relative w-full flex items-center justify-center my-12 opacity-80">
+            <div class="pipe-joint"></div>
+            <div class="pipe-h w-full max-w-4xl"></div>
+            <div class="pipe-joint"></div>
+        </div>
+
+        <!-- 2. O que é a corrosão? -->
+        <section id="oque-e" class="scroll-mt-24">
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <div class="w-full lg:w-1/2 metal-plate p-8 relative">
+                    <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+                    <h2 class="font-victorian text-4xl mb-6 text-metallic flex items-center gap-4">
+                        <i class="fa-solid fa-flask text-cobre"></i> O que é a Corrosão?
+                    </h2>
+                    <div class="text-gray-300 leading-relaxed space-y-4 text-justify">
+                        <p>
+                            A corrosão consiste na <strong>degradação progressiva dos metais</strong> resultante de reações químicas e eletroquímicas com o meio envolvente. Este fenómeno ocorre sempre que o metal reage com agentes corrosivos, como o oxigénio e a água, provocando uma transferência de eletrões.
+                        </p>
+                        <p>
+                            As consequências da corrosão são severas e globais. A nível técnico, causa a perda de resistência mecânica e falhas estruturais abruptas, gerando enormes riscos para a segurança pública e de operações. 
+                        </p>
+                        <p>
+                            A nível socioeconómico, resulta num profundo impacto económico associado aos elevados custos de manutenção, reparação e substituição. Tem ainda um impacto ambiental negativo devido às perdas de material, contaminações e desperdício de energia. É uma constante ameaça silenciosa no nosso quotidiano.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="w-full lg:w-1/2 grid grid-cols-2 gap-4">
+                    <div class="metal-plate p-4 flex flex-col items-center justify-center text-center aspect-square hover-shine">
+                        <i class="fa-solid fa-car-burst text-4xl text-ferro-oxidado mb-3"></i>
+                        <h3 class="font-victorian text-dourado-velho">Automóveis</h3>
+                        <p class="text-xs text-gray-400 mt-2">Degradação da chapa devido à exposição a humidade e sal.</p>
+                    </div>
+                    <div class="metal-plate p-4 flex flex-col items-center justify-center text-center aspect-square hover-shine">
+                        <i class="fa-solid fa-bridge-water text-4xl text-bronze mb-3"></i>
+                        <h3 class="font-victorian text-dourado-velho">Pontes</h3>
+                        <p class="text-xs text-gray-400 mt-2">Falhas de resistência mecânica face aos elementos externos.</p>
+                    </div>
+                    <div class="metal-plate p-4 flex flex-col items-center justify-center text-center aspect-square hover-shine">
+                        <i class="fa-solid fa-faucet-drip text-4xl text-cobre mb-3"></i>
+                        <h3 class="font-victorian text-dourado-velho">Canos</h3>
+                        <p class="text-xs text-gray-400 mt-2">Ruturas e contaminação originadas pela pressão e oxidação.</p>
+                    </div>
+                    <div class="metal-plate p-4 flex flex-col items-center justify-center text-center aspect-square hover-shine">
+                        <i class="fa-solid fa-ship text-4xl text-gray-500 mb-3"></i>
+                        <h3 class="font-victorian text-dourado-velho">Navios</h3>
+                        <p class="text-xs text-gray-400 mt-2">Desgaste rápido e agressivo provocado pela água do mar.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Horizontal Pipe Divider -->
+        <div class="relative w-full flex items-center justify-center my-12 opacity-80">
+            <div class="pipe-joint"></div>
+            <div class="pipe-h w-full max-w-4xl"></div>
+            <div class="pipe-joint"></div>
+        </div>
+
+        <!-- 3. Tipos de corrosão -->
+        <section id="tipos" class="scroll-mt-24">
+            <h2 class="font-victorian text-4xl mb-12 text-center text-metallic uppercase tracking-widest">
+                <i class="fa-solid fa-microscope text-bronze mr-3"></i> Tipos de Corrosão
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Cartão 1 -->
+                <div class="metal-plate p-6 hover-shine flex flex-col relative group">
+                    <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+                    <div class="text-center mb-4">
+                        <i class="fa-solid fa-layer-group text-5xl text-dourado-velho group-hover:text-cobre transition-colors duration-300"></i>
+                    </div>
+                    <h3 class="font-victorian text-2xl text-center text-gray-200 mb-3 border-b border-ferro-oxidado pb-2">Uniforme</h3>
+                    <p class="text-sm text-gray-400 text-center flex-grow">Degradação regular em toda a superfície do metal. É fácil de monitorizar e prever. <br><br><em>Exemplo:</em> Ferrugem generalizada numa chapa de aço não tratada.</p>
+                </div>
+
+                <!-- Cartão 2 -->
+                <div class="metal-plate p-6 hover-shine flex flex-col relative group">
+                    <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+                    <div class="text-center mb-4">
+                        <i class="fa-solid fa-bolt text-5xl text-dourado-velho group-hover:text-cobre transition-colors duration-300"></i>
+                    </div>
+                    <h3 class="font-victorian text-2xl text-center text-gray-200 mb-3 border-b border-ferro-oxidado pb-2">Galvânica</h3>
+                    <p class="text-sm text-gray-400 text-center flex-grow">Surge do contacto entre dois metais distintos num meio condutor, degradando rapidamente o menos nobre. <br><br><em>Exemplo:</em> Parafusos de aço fixados em placas de latão.</p>
+                </div>
+
+                <!-- Cartão 3 -->
+                <div class="metal-plate p-6 hover-shine flex flex-col relative group">
+                    <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+                    <div class="text-center mb-4">
+                        <i class="fa-solid fa-certificate text-5xl text-dourado-velho group-hover:text-cobre transition-colors duration-300"></i>
+                    </div>
+                    <h3 class="font-victorian text-2xl text-center text-gray-200 mb-3 border-b border-ferro-oxidado pb-2">Por Pites</h3>
+                    <p class="text-sm text-gray-400 text-center flex-grow">Ataque altamente localizado que cria minúsculos buracos profundos, sendo um risco grave pela sua difícil deteção. <br><br><em>Exemplo:</em> Furos pontuais em tubagens de aço inoxidável.</p>
+                </div>
+
+                <!-- Cartão 4 -->
+                <div class="metal-plate p-6 hover-shine flex flex-col relative group">
+                    <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+                    <div class="text-center mb-4">
+                        <i class="fa-solid fa-border-all text-5xl text-dourado-velho group-hover:text-cobre transition-colors duration-300"></i>
+                    </div>
+                    <h3 class="font-victorian text-2xl text-center text-gray-200 mb-3 border-b border-ferro-oxidado pb-2">Intergranular</h3>
+                    <p class="text-sm text-gray-400 text-center flex-grow">Ataque nas fronteiras dos cristais (grãos) que compõem o metal, enfraquecendo a estrutura interna sem marcas evidentes. <br><br><em>Exemplo:</em> Degradação oculta em zonas soldadas.</p>
+                </div>
+
+                <!-- Cartão 5 -->
+                <div class="metal-plate p-6 hover-shine flex flex-col relative group lg:col-start-2">
+                    <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+                    <div class="text-center mb-4">
+                        <i class="fa-solid fa-arrows-to-dot text-5xl text-dourado-velho group-hover:text-cobre transition-colors duration-300"></i>
+                    </div>
+                    <h3 class="font-victorian text-2xl text-center text-gray-200 mb-3 border-b border-ferro-oxidado pb-2">Por Fissuras</h3>
+                    <p class="text-sm text-gray-400 text-center flex-grow">Corrosão intensificada em pequenas aberturas ou espaços confinados que retêm fluidos estagnados. <br><br><em>Exemplo:</em> Oxidação acelerada por baixo de rebites apertados.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Horizontal Pipe Divider -->
+        <div class="relative w-full flex items-center justify-center my-12 opacity-80">
+            <div class="pipe-joint"></div>
+            <div class="pipe-h w-full max-w-4xl"></div>
+            <div class="pipe-joint"></div>
+        </div>
+
+        <!-- 4. Ambientes propícios -->
+        <section id="ambientes" class="scroll-mt-24">
+            <h2 class="font-victorian text-4xl mb-12 text-center text-metallic uppercase tracking-widest">
+                <i class="fa-solid fa-cloud-showers-heavy text-ferro-oxidado mr-3"></i> Ambientes Propícios à Corrosão
+            </h2>
+
+            <div class="relative border-l-4 border-ferro-oxidado ml-4 md:ml-20 pl-8 space-y-12">
+                <!-- Tubo decorativo vertical -->
+                <div class="absolute -left-[14px] top-0 bottom-0 pipe-v z-0"></div>
+
+                <div class="relative z-10 bg-castanho-escuro/60 p-6 border border-cobre/30 backdrop-blur hover:bg-castanho-escuro transition-colors">
+                    <div class="absolute -left-[45px] top-1/2 -translate-y-1/2 pipe-joint"></div>
+                    <h3 class="font-victorian text-2xl text-bronze mb-2">Ambientes Marítimos</h3>
+                    <p class="text-gray-300">Acelera fortemente a corrosão porque a presença de sal e água atua como um eletrólito de alta condutividade elétrica.</p>
+                </div>
+
+                <div class="relative z-10 bg-castanho-escuro/60 p-6 border border-cobre/30 backdrop-blur hover:bg-castanho-escuro transition-colors">
+                    <div class="absolute -left-[45px] top-1/2 -translate-y-1/2 pipe-joint"></div>
+                    <h3 class="font-victorian text-2xl text-bronze mb-2">Locais Húmidos</h3>
+                    <p class="text-gray-300">A humidade contínua fornece as moléculas de água essenciais para catalisar e sustentar a troca de eletrões.</p>
+                </div>
+
+                <div class="relative z-10 bg-castanho-escuro/60 p-6 border border-cobre/30 backdrop-blur hover:bg-castanho-escuro transition-colors">
+                    <div class="absolute -left-[45px] top-1/2 -translate-y-1/2 pipe-joint"></div>
+                    <h3 class="font-victorian text-2xl text-bronze mb-2">Ambientes Industriais</h3>
+                    <p class="text-gray-300">A emissão de poluentes gasosos mistura-se com a atmosfera gerando chuvas ácidas que atacam agressivamente a superfície metálica.</p>
+                </div>
+
+                <div class="relative z-10 bg-castanho-escuro/60 p-6 border border-cobre/30 backdrop-blur hover:bg-castanho-escuro transition-colors">
+                    <div class="absolute -left-[45px] top-1/2 -translate-y-1/2 pipe-joint"></div>
+                    <h3 class="font-victorian text-2xl text-bronze mb-2">Contacto Químico e Temperaturas Elevadas</h3>
+                    <p class="text-gray-300">Substâncias corrosivas aliadas ao calor aumentam a agitação molecular, multiplicando drasticamente a velocidade das reações químicas de degradação.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Horizontal Pipe Divider -->
+        <div class="relative w-full flex items-center justify-center my-12 opacity-80">
+            <div class="pipe-joint"></div>
+            <div class="pipe-h w-full max-w-4xl"></div>
+            <div class="pipe-joint"></div>
+        </div>
+
+        <!-- 5. Como proteger -->
+        <section id="protecao" class="scroll-mt-24">
+            <div class="text-center mb-16">
+                <h2 class="font-victorian text-5xl text-metallic uppercase tracking-widest inline-block relative">
+                    Métodos de Proteção
+                    <span class="block text-xl text-dourado-velho mt-2">Defesas Modernas Contra a Oxidação</span>
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                
+                <div class="metal-plate p-6 flex items-start gap-6 hover-shine group">
+                    <div class="rivet tl"></div><div class="rivet br"></div>
+                    <div class="w-20 h-20 shrink-0 bg-preto border-2 border-dourado-velho flex items-center justify-center rounded-full group-hover:rotate-12 transition-transform">
+                        <i class="fa-solid fa-paint-roller text-3xl text-bronze"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-victorian text-2xl text-gray-100 mb-2">Pintura e Revestimentos</h3>
+                        <p class="text-sm text-gray-400"><strong>Como funciona:</strong> Aplicação de polímeros ou vernizes para isolar fisicamente o metal do meio corrosivo.<br><strong>Vantagem:</strong> Solução económica e simples para grandes estruturas.</p>
+                    </div>
+                </div>
+
+                <div class="metal-plate p-6 flex items-start gap-6 hover-shine group">
+                    <div class="rivet tr"></div><div class="rivet bl"></div>
+                    <div class="w-20 h-20 shrink-0 bg-preto border-2 border-dourado-velho flex items-center justify-center rounded-full group-hover:rotate-12 transition-transform">
+                        <i class="fa-solid fa-shield-halved text-3xl text-cobre"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-victorian text-2xl text-gray-100 mb-2">Galvanização</h3>
+                        <p class="text-sm text-gray-400"><strong>Como funciona:</strong> Cobertura do metal base com uma camada protetora de zinco.<br><strong>Vantagem:</strong> Oferece dupla proteção, pois funciona como barreira e como metal de sacrifício caso exista um risco na superfície.</p>
+                    </div>
+                </div>
+
+                <div class="metal-plate p-6 flex items-start gap-6 hover-shine group">
+                    <div class="rivet tl"></div><div class="rivet br"></div>
+                    <div class="w-20 h-20 shrink-0 bg-preto border-2 border-dourado-velho flex items-center justify-center rounded-full group-hover:-rotate-12 transition-transform">
+                        <i class="fa-solid fa-car-battery text-3xl text-bronze"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-victorian text-2xl text-gray-100 mb-2">Proteção Catódica</h3>
+                        <p class="text-sm text-gray-400"><strong>Como funciona:</strong> Conexão da estrutura a um "ânodo de sacrifício" (metal mais reativo), forçando a oxidação intencional do ânodo em vez do metal principal.<br><strong>Vantagem:</strong> Altamente eficiente e essencial para navios, tubagens e estruturas submersas.</p>
+                    </div>
+                </div>
+
+                <div class="metal-plate p-6 flex items-start gap-6 hover-shine group">
+                    <div class="rivet tr"></div><div class="rivet bl"></div>
+                    <div class="w-20 h-20 shrink-0 bg-preto border-2 border-dourado-velho flex items-center justify-center rounded-full group-hover:-rotate-12 transition-transform">
+                        <i class="fa-solid fa-cubes text-3xl text-cobre"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-victorian text-2xl text-gray-100 mb-2">Ligas Metálicas</h3>
+                        <p class="text-sm text-gray-400"><strong>Como funciona:</strong> Fusão do metal com elementos secundários, como o crómio no aço inoxidável, para modificar as suas propriedades estruturais.<br><strong>Vantagem:</strong> Garante uma resistência inata prolongada, dispensando frequentes manutenções de superfície.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Horizontal Pipe Divider -->
+        <div class="relative w-full flex items-center justify-center my-12 opacity-80">
+            <div class="pipe-joint"></div>
+            <div class="pipe-h w-full max-w-4xl"></div>
+            <div class="pipe-joint"></div>
+        </div>
+
+        <!-- 6. Esquema Visual -->
+        <section id="esquema" class="scroll-mt-24 pb-20">
+            <h2 class="font-victorian text-4xl mb-12 text-center text-metallic uppercase tracking-widest">
+                <i class="fa-solid fa-cogs text-dourado-velho mr-3"></i> O Mecanismo da Degradação
+            </h2>
+
+            <div class="relative metal-plate p-8 max-w-5xl mx-auto overflow-hidden">
+                <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+                
+                <!-- Background decoration for scheme -->
+                <div class="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
+                    <i class="fa-solid fa-dharmachakra text-[30rem] animate-spin" style="animation-duration: 60s;"></i>
+                </div>
+
+                <!-- O Diagrama (Steampunk Flowchart) -->
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 py-12">
+                    
+                    <!-- Passo 1 -->
+                    <div class="flex flex-col items-center text-center w-full md:w-1/4">
+                        <div class="w-24 h-24 rounded-full border-4 border-gray-400 bg-gradient-to-br from-gray-300 to-gray-600 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                            <i class="fa-solid fa-cube text-3xl text-gray-800"></i>
+                        </div>
+                        <h4 class="font-victorian text-xl text-dourado-velho">Metal</h4>
+                        <p class="text-xs text-gray-400 mt-2">Material base suscetível a instabilidade termodinâmica.</p>
+                    </div>
+
+                    <!-- Seta/Tubo 1 -->
+                    <div class="hidden md:flex flex-1 items-center justify-center">
+                        <div class="pipe-h w-full relative flex items-center justify-center">
+                            <i class="fa-solid fa-caret-right text-cobre absolute text-2xl animate-pulse"></i>
+                        </div>
+                    </div>
+                    <div class="md:hidden flex items-center justify-center py-4">
+                        <i class="fa-solid fa-caret-down text-cobre text-3xl animate-pulse"></i>
+                    </div>
+
+                    <!-- Passo 2 -->
+                    <div class="flex flex-col items-center text-center w-full md:w-1/4">
+                        <div class="w-24 h-24 rounded-full border-4 border-blue-900 bg-gradient-to-br from-blue-700 to-blue-900 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(0,0,255,0.2)]">
+                            <i class="fa-solid fa-droplet text-3xl text-blue-200"></i>
+                        </div>
+                        <h4 class="font-victorian text-xl text-dourado-velho">Exposição</h4>
+                        <p class="text-xs text-gray-400 mt-2">Contacto inevitável com o oxigénio e com a humidade.</p>
+                    </div>
+
+                    <!-- Seta/Tubo 2 -->
+                    <div class="hidden md:flex flex-1 items-center justify-center">
+                        <div class="pipe-h w-full relative flex items-center justify-center">
+                            <i class="fa-solid fa-caret-right text-bronze absolute text-2xl animate-pulse"></i>
+                        </div>
+                    </div>
+                    <div class="md:hidden flex items-center justify-center py-4">
+                        <i class="fa-solid fa-caret-down text-bronze text-3xl animate-pulse"></i>
+                    </div>
+
+                    <!-- Passo 3 -->
+                    <div class="flex flex-col items-center text-center w-full md:w-1/4">
+                        <div class="w-24 h-24 rounded-full border-4 border-yellow-700 bg-gradient-to-br from-yellow-500 to-orange-700 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(255,165,0,0.2)]">
+                            <i class="fa-solid fa-bolt-lightning text-3xl text-yellow-100"></i>
+                        </div>
+                        <h4 class="font-victorian text-xl text-dourado-velho">Reação Química</h4>
+                        <p class="text-xs text-gray-400 mt-2">Processo de oxidação e transferência de eletrões.</p>
+                    </div>
+
+                    <!-- Seta/Tubo 3 -->
+                    <div class="hidden md:flex flex-1 items-center justify-center">
+                        <div class="pipe-h w-full relative flex items-center justify-center">
+                            <i class="fa-solid fa-caret-right text-ferro-oxidado absolute text-2xl animate-pulse"></i>
+                        </div>
+                    </div>
+                    <div class="md:hidden flex items-center justify-center py-4">
+                        <i class="fa-solid fa-caret-down text-ferro-oxidado text-3xl animate-pulse"></i>
+                    </div>
+
+                    <!-- Passo 4 -->
+                    <div class="flex flex-col items-center text-center w-full md:w-1/4">
+                        <div class="w-24 h-24 rounded-full border-4 border-ferro-oxidado bg-gradient-to-br from-[#8B4513] to-[#5C3A21] flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(139,69,19,0.4)]">
+                            <i class="fa-solid fa-biohazard text-3xl text-[#c4885c]"></i>
+                        </div>
+                        <h4 class="font-victorian text-xl text-ferro-oxidado font-bold">Corrosão</h4>
+                        <p class="text-xs text-gray-400 mt-2">Degradação irreversível que resulta em perda estrutural.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center text-sm text-gray-400 italic bg-preto/50 p-4 border border-ferro-oxidado/50 rounded">
+                    Esta sequência reflete a transformação inevitável. Para evitar os <strong>Danos</strong>, aplicamos técnicas de <strong>Proteção</strong> que interrompem a Exposição ou alteram a própria Reação Química.
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 8. Rodapé -->
+    <footer class="bg-[#0A0A0A] border-t-4 border-bronze pt-12 pb-6 relative z-10">
+        <div class="container mx-auto px-4 text-center">
+            <i class="fa-solid fa-industry text-4xl text-ferro-oxidado mb-4"></i>
+            <h3 class="font-victorian text-2xl text-dourado-velho mb-2">Conclusão: O Valor da Prevenção</h3>
+            <p class="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed mb-8">
+                Embora a corrosão seja um fenómeno natural impulsionado pela própria termodinâmica, ela pode e deve ser controlada. O forte investimento na prevenção não só reduz significativamente os custos de manutenção, como aumenta o nível de segurança e prolonga de forma drástica a vida útil de todas as nossas estruturas metálicas.
+            </p>
+            
+            <div class="w-32 h-[1px] bg-ferro-oxidado mx-auto mb-8"></div>
+            
+            <div class="text-xs text-gray-600 font-body uppercase tracking-wider space-y-2">
+                <p>Trabalho Escolar Científico - Proteção e Corrosão dos Metais</p>
+                <p>&copy; 2026 Engenharia Industrial & Química.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 7. Modal Especial de Imagem -->
+    <div id="image-modal" class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none" onclick="toggleModal(false)">
+        <!-- Fundo escurecido gerido pelo CSS backdrop-filter no #image-modal -->
+        
+        <div class="relative max-w-4xl w-[90%] md:w-[80%] max-h-[90vh] metal-plate p-4 transform scale-95 transition-transform duration-500 shadow-2xl" id="modal-content" onclick="event.stopPropagation()">
+            <!-- Botão Fechar -->
+            <button onclick="toggleModal(false)" class="absolute -top-4 -right-4 w-10 h-10 rounded-full metal-plate flex items-center justify-center text-dourado-velho hover:text-white hover:scale-110 transition-all z-50">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+
+            <!-- Moldura Interna -->
+            <div class="border-2 border-dourado-velho p-2 bg-preto h-full w-full">
+                <img src="https://images.unsplash.com/photo-1533036720743-f66f91d9600e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Engrenagens Metálicas Corroídas" class="w-full h-auto max-h-[75vh] object-cover filter contrast-125 sepia-[.3]">
+                <div class="mt-4 text-center">
+                    <h4 class="font-victorian text-bronze text-xl">O Custo da Inação</h4>
+                    <p class="text-xs text-gray-400 mt-1">Falha e degradação estrutural causadas pela falência dos métodos preventivos num ambiente industrial.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interatividade JavaScript -->
+    <script>
+        // Gestão do Modal
+        const modal = document.getElementById('image-modal');
+        const modalContent = document.getElementById('modal-content');
+
+        function toggleModal(show) {
+            if (show) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100', 'pointer-events-auto');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95');
+                    modalContent.classList.add('scale-100');
+                }, 50);
+            } else {
+                modalContent.classList.remove('scale-100');
+                modalContent.classList.add('scale-95');
+                modal.classList.remove('opacity-100', 'pointer-events-auto');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        // Fechar com a tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') toggleModal(false);
+        });
+
+        // Gerador de Partículas de Vapor
+        const steamContainer = document.getElementById('steam-container');
+        
+        function createSteamParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('steam-particle');
+            
+            // Random properties
+            const size = Math.random() * 100 + 50; // 50px a 150px
+            const left = Math.random() * 100; // 0% a 100% da largura
+            const duration = Math.random() * 10 + 10; // 10s a 20s
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${left}vw`;
+            particle.style.animation = `steam-rise ${duration}s ease-in forwards`;
+            
+            steamContainer.appendChild(particle);
+            
+            // Remove partícula quando a animação termina
+            setTimeout(() => {
+                particle.remove();
+            }, duration * 1000);
+        }
+
+        // Criar vapor periodicamente
+        setInterval(createSteamParticle, 1500);
+
+        // Preencher inicialmente
+        for(let i=0; i<5; i++) {
+            setTimeout(createSteamParticle, i * 500);
+        }
+    </script>
+</body>
+</html>
